@@ -3,6 +3,7 @@ package com.faforever.client.replay;
 import com.faforever.client.config.ClientProperties;
 import com.faforever.client.domain.FeaturedModBean;
 import com.faforever.client.domain.GamePlayerStatsBean;
+import com.faforever.client.domain.LeagueScoreJournalBean;
 import com.faforever.client.domain.MapBean;
 import com.faforever.client.domain.MapVersionBean;
 import com.faforever.client.domain.PlayerBean;
@@ -10,6 +11,7 @@ import com.faforever.client.domain.ReplayBean;
 import com.faforever.client.domain.ReplayBean.ChatMessage;
 import com.faforever.client.domain.ReplayBean.GameOption;
 import com.faforever.client.domain.ReplayReviewBean;
+import com.faforever.client.domain.SubdivisionBean;
 import com.faforever.client.fx.FxApplicationThreadExecutor;
 import com.faforever.client.fx.ImageViewHelper;
 import com.faforever.client.fx.JavaFxUtil;
@@ -20,6 +22,7 @@ import com.faforever.client.fx.contextmenu.ContextMenuBuilder;
 import com.faforever.client.game.RatingPrecision;
 import com.faforever.client.game.TeamCardController;
 import com.faforever.client.i18n.I18n;
+import com.faforever.client.leaderboard.LeaderboardService;
 import com.faforever.client.map.MapService;
 import com.faforever.client.map.MapService.PreviewSize;
 import com.faforever.client.map.generator.MapGeneratorService;
@@ -96,6 +99,7 @@ public class ReplayDetailController extends NodeController<Node> {
   private final UiService uiService;
   private final ReplayService replayService;
   private final RatingService ratingService;
+  private final LeaderboardService leaderboardService;
   private final MapService mapService;
   private final MapGeneratorService mapGeneratorService;
   private final PlayerService playerService;
@@ -323,6 +327,8 @@ public class ReplayDetailController extends NodeController<Node> {
     if (newValue.getReplayFile() != null) {
       enrichReplayLater(newValue.getReplayFile(), newValue);
     }
+    
+    leaderboardService.getLeagueScoreJournalForReplay(newValue).thenAccept(newValue::setLeagueScores);
 
     reviewsController.setCanWriteReview(true);
 
@@ -466,6 +472,7 @@ public class ReplayDetailController extends NodeController<Node> {
 
       controller.setRatingPrecision(RatingPrecision.EXACT);
       controller.setRatingProvider(player -> getPlayerRating(player, statsByPlayer));
+      controller.setDivisionProvider(this::getPlayerDivision);
       controller.setFactionProvider(player -> getPlayerFaction(player, statsByPlayer));
       controller.setTeamId(Integer.parseInt(team));
       controller.setPlayers(statsByPlayer.keySet());
@@ -488,6 +495,16 @@ public class ReplayDetailController extends NodeController<Node> {
                                                    .filter(ratingJournal -> ratingJournal.getDeviationBefore() != null)
                                                    .map(RatingUtil::getRating)
                                                    .orElse(null);
+  }
+  
+  private SubdivisionBean getPlayerDivision(PlayerBean player) {
+    return replay.map(ReplayBean::getLeagueScores).map(leagueScoreJournalBeans -> leagueScoreJournalBeans
+        .stream()
+        .filter(leagueScoreJournalBean -> leagueScoreJournalBean.getLoginId() == player.getId())
+        .findFirst()
+        .map(LeagueScoreJournalBean::getDivisionAfter)
+        .orElse(null)
+    ).getValue();
   }
 
   public void onReport() {

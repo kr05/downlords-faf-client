@@ -64,6 +64,7 @@ public class ReplayBean {
       .boxed()
       .findFirst()
       .orElse(null));
+  ObjectProperty<List<LeagueScoreJournalBean>> leagueScores = new SimpleObjectProperty<>();
 
   public static String getReplayUrl(int replayId, String baseUrlFormat) {
     return String.format(baseUrlFormat, replayId);
@@ -306,6 +307,19 @@ public class ReplayBean {
 
   public void setLocal(boolean local) {
     this.local.set(local);
+  }
+
+  public List<LeagueScoreJournalBean> getLeagueScores() {
+    return leagueScores.get();
+  }
+
+  public ObjectProperty<List<LeagueScoreJournalBean>> leagueScoresProperty() {
+    return leagueScores;
+  }
+
+  public void setLeagueScores(List<LeagueScoreJournalBean> scores) {
+    leagueScores.set(scores);
+    System.out.println(scores);
   }
 
   public record ChatMessage(Duration time, String sender, String message) {}

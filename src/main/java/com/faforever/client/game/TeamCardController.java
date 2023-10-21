@@ -4,6 +4,7 @@ package com.faforever.client.game;
 import com.faforever.client.domain.GameBean;
 import com.faforever.client.domain.GamePlayerStatsBean;
 import com.faforever.client.domain.PlayerBean;
+import com.faforever.client.domain.SubdivisionBean;
 import com.faforever.client.fx.FxApplicationThreadExecutor;
 import com.faforever.client.fx.NodeController;
 import com.faforever.client.fx.SimpleChangeListener;
@@ -55,6 +56,7 @@ public class TeamCardController extends NodeController<Node> {
   private final ObjectProperty<List<Integer>> playerIds = new SimpleObjectProperty<>(List.of());
   private final ObjectProperty<List<PlayerBean>> players = new SimpleObjectProperty<>(List.of());
   private final ObjectProperty<Function<PlayerBean, Integer>> ratingProvider = new SimpleObjectProperty<>();
+  private final ObjectProperty<Function<PlayerBean, SubdivisionBean>> divisionProvider = new SimpleObjectProperty<>();
   private final ObjectProperty<Function<PlayerBean, Faction>> factionProvider = new SimpleObjectProperty<>();
   private final ObjectProperty<RatingPrecision> ratingPrecision = new SimpleObjectProperty<>();
   private final IntegerProperty teamId = new SimpleIntegerProperty();
@@ -99,6 +101,8 @@ public class TeamCardController extends NodeController<Node> {
       controller.ratingProperty()
           .bind(ratingProvider.map(ratingFunction -> ratingFunction.apply(player))
               .flatMap(rating -> ratingPrecision.map(precision -> precision == RatingPrecision.ROUNDED ? RatingUtil.getRoundedRating(rating) : rating)));
+      controller.divisionProperty()
+              .bind(divisionProvider.map(divisionFunction -> divisionFunction.apply(player)));
       controller.factionProperty()
           .bind(factionProvider.map(factionFunction -> factionFunction.apply(player)));
       controller.setPlayer(player);
@@ -118,6 +122,10 @@ public class TeamCardController extends NodeController<Node> {
 
   public void setRatingProvider(Function<PlayerBean, Integer> ratingProvider) {
     this.ratingProvider.set(ratingProvider);
+  }
+
+  public void setDivisionProvider(Function<PlayerBean, SubdivisionBean> divisionProvider) {
+    this.divisionProvider.set(divisionProvider);
   }
 
   public void setFactionProvider(Function<PlayerBean, Faction> factionProvider) {

@@ -225,13 +225,12 @@ public class LeaderboardService {
     );
   }
   
-  public CompletableFuture<LeagueScoreJournalBean> getLeagueScoreJournalEntry(PlayerBean player, ReplayBean replay) {
+  public CompletableFuture<List<LeagueScoreJournalBean>> getLeagueScoreJournalForReplay(ReplayBean replay) {
     ElideNavigatorOnCollection<LeagueScoreJournal> navigator = ElideNavigator.of(LeagueScoreJournal.class).collection()
-        .setFilter(qBuilder().intNum("login.id").eq(player.getId())
-            .and().intNum("game.id").eq(replay.getId()));
+        .setFilter(qBuilder().intNum("game.id").eq(replay.getId()));
     return fafApiAccessor.getMany(navigator)
-        .next()
         .map(dto -> leaderboardMapper.map(dto, new CycleAvoidingMappingContext()))
+        .collectList()
         .toFuture();
   }
 

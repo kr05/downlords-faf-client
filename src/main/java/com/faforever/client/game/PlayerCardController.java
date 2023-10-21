@@ -5,6 +5,7 @@ import com.faforever.client.domain.AvatarBean;
 import com.faforever.client.domain.GamePlayerStatsBean;
 import com.faforever.client.domain.LeaderboardRatingJournalBean;
 import com.faforever.client.domain.PlayerBean;
+import com.faforever.client.domain.SubdivisionBean;
 import com.faforever.client.fx.JavaFxUtil;
 import com.faforever.client.fx.NodeController;
 import com.faforever.client.fx.SimpleChangeListener;
@@ -21,6 +22,7 @@ import com.faforever.client.fx.contextmenu.SendPrivateMessageMenuItem;
 import com.faforever.client.fx.contextmenu.ShowPlayerInfoMenuItem;
 import com.faforever.client.fx.contextmenu.ViewReplaysMenuItem;
 import com.faforever.client.i18n.I18n;
+import com.faforever.client.leaderboard.LeaderboardService;
 import com.faforever.client.player.CountryFlagService;
 import com.faforever.client.player.SocialStatus;
 import com.faforever.client.theme.ThemeService;
@@ -60,6 +62,7 @@ public class PlayerCardController extends NodeController<Node> {
   private final UiService uiService;
   private final CountryFlagService countryFlagService;
   private final AvatarService avatarService;
+  private final LeaderboardService leaderboardService;
   private final ContextMenuBuilder contextMenuBuilder;
   private final I18n i18n;
 
@@ -71,21 +74,24 @@ public class PlayerCardController extends NodeController<Node> {
   public Label friendIconText;
   public Region factionIcon;
   public ImageView factionImage;
+  public ImageView divisionImageView;
   public Label noteIcon;
   public Label ratingChange;
 
   private final ObjectProperty<PlayerBean> player = new SimpleObjectProperty<>();
   private final ObjectProperty<GamePlayerStatsBean> playerStats = new SimpleObjectProperty<>();
   private final ObjectProperty<Integer> rating = new SimpleObjectProperty<>();
+  private final ObjectProperty<SubdivisionBean> division = new SimpleObjectProperty<>();
   private final ObjectProperty<Faction> faction = new SimpleObjectProperty<>();
   private final Tooltip noteTooltip = new Tooltip();
   private final Tooltip avatarTooltip = new Tooltip();
 
   @Override
   protected void onInitialize() {
-    JavaFxUtil.bindManagedToVisible(factionIcon, foeIconText, factionImage, friendIconText, countryImageView, noteIcon);
+    JavaFxUtil.bindManagedToVisible(factionIcon, foeIconText, factionImage, friendIconText, countryImageView, divisionImageView, noteIcon);
     countryImageView.visibleProperty().bind(countryImageView.imageProperty().isNotNull());
     avatarImageView.visibleProperty().bind(avatarImageView.imageProperty().isNotNull());
+    divisionImageView.visibleProperty().bind(divisionImageView.imageProperty().isNotNull());
 
     factionImage.setImage(uiService.getImage(ThemeService.RANDOM_FACTION_IMAGE));
     factionImage.visibleProperty().bind(faction.map(value -> value == Faction.RANDOM));
@@ -97,10 +103,13 @@ public class PlayerCardController extends NodeController<Node> {
             .when(showing));
     avatarImageView.imageProperty()
         .bind(player.flatMap(PlayerBean::avatarProperty).map(avatarService::loadAvatar).when(showing));
+    divisionImageView.imageProperty()
+            .bind(division.flatMap(SubdivisionBean::smallImageUrlProperty).map(leaderboardService::loadDivisionImage).when(showing));
     playerInfo.textProperty()
         .bind(player.flatMap(PlayerBean::usernameProperty)
-            .flatMap(username -> rating.map(value -> i18n.get("userInfo.tooltipFormat.withRating", username, value))
-                .orElse(i18n.get("userInfo.tooltipFormat.noRating", username)))
+            .map(username -> (rating.get() != null && division.get() == null)
+                ? i18n.get("userInfo.tooltipFormat.withRating", username, rating.get())
+                : i18n.get("userInfo.tooltipFormat.noRating", username))
             .when(showing));
     foeIconText.visibleProperty()
         .bind(player.flatMap(PlayerBean::socialStatusProperty)
@@ -235,6 +244,18 @@ public class PlayerCardController extends NodeController<Node> {
 
   public void setRating(Integer rating) {
     this.rating.set(rating);
+  }
+
+  public SubdivisionBean getDivision() {
+    return division.get();
+  }
+
+  public ObjectProperty<SubdivisionBean> divisionProperty() {
+    return division;
+  }
+
+  public void setDivision(SubdivisionBean subdivision) {
+    this.division.set(subdivision);
   }
 
   public Faction getFaction() {

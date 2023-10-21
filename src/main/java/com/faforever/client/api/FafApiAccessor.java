@@ -96,7 +96,7 @@ public class FafApiAccessor implements InitializingBean {
       java.util.Map.entry(LeagueSeasonScore.class, List.of("leagueSeason", "leagueSeason.leaderboard", "leagueSeason.league",
           "leagueSeasonDivisionSubdivision", "leagueSeasonDivisionSubdivision.leagueSeasonDivision")),
       java.util.Map.entry(LeagueSeasonDivisionSubdivision.class, List.of("leagueSeasonDivision", "leagueSeasonDivision.leagueSeason")),
-      java.util.Map.entry(LeagueScoreJournal.class, List.of("leagueSeason","leagueSeasonDivisionSubdivision")),
+      java.util.Map.entry(LeagueScoreJournal.class, List.of("leagueSeason", "leagueSeasonDivisionSubdivisionBefore", "leagueSeasonDivisionSubdivisionAfter")),
       java.util.Map.entry(MapVersion.class, List.of("map", "map.reviewsSummary", "map.author")),
       java.util.Map.entry(MapReviewsSummary.class, List.of("map.latestVersion", "map.author", "map.reviewsSummary")),
       java.util.Map.entry(Map.class, List.of("latestVersion", "author", "reviewsSummary")),

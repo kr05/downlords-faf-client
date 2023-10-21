@@ -227,7 +227,7 @@ public class LeaderboardService {
   
   public CompletableFuture<List<LeagueScoreJournalBean>> getLeagueScoreJournalForReplay(ReplayBean replay) {
     ElideNavigatorOnCollection<LeagueScoreJournal> navigator = ElideNavigator.of(LeagueScoreJournal.class).collection()
-        .setFilter(qBuilder().intNum("game.id").eq(replay.getId()));
+        .setFilter(qBuilder().intNum("gameId").eq(replay.getId()));
     return fafApiAccessor.getMany(navigator)
         .map(dto -> leaderboardMapper.map(dto, new CycleAvoidingMappingContext()))
         .collectList()

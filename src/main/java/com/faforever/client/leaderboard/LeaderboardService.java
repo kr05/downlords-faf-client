@@ -6,8 +6,10 @@ import com.faforever.client.domain.LeaderboardBean;
 import com.faforever.client.domain.LeaderboardEntryBean;
 import com.faforever.client.domain.LeagueBean;
 import com.faforever.client.domain.LeagueEntryBean;
+import com.faforever.client.domain.LeagueScoreJournalBean;
 import com.faforever.client.domain.LeagueSeasonBean;
 import com.faforever.client.domain.PlayerBean;
+import com.faforever.client.domain.ReplayBean;
 import com.faforever.client.domain.SubdivisionBean;
 import com.faforever.client.mapstruct.CycleAvoidingMappingContext;
 import com.faforever.client.mapstruct.LeaderboardMapper;
@@ -16,6 +18,7 @@ import com.faforever.client.remote.AssetService;
 import com.faforever.commons.api.dto.Leaderboard;
 import com.faforever.commons.api.dto.LeaderboardEntry;
 import com.faforever.commons.api.dto.League;
+import com.faforever.commons.api.dto.LeagueScoreJournal;
 import com.faforever.commons.api.dto.LeagueSeason;
 import com.faforever.commons.api.dto.LeagueSeasonDivisionSubdivision;
 import com.faforever.commons.api.dto.LeagueSeasonScore;
@@ -220,6 +223,16 @@ public class LeaderboardService {
         .collectList()
         .toFuture()
     );
+  }
+  
+  public CompletableFuture<LeagueScoreJournalBean> getLeagueScoreJournalEntry(PlayerBean player, ReplayBean replay) {
+    ElideNavigatorOnCollection<LeagueScoreJournal> navigator = ElideNavigator.of(LeagueScoreJournal.class).collection()
+        .setFilter(qBuilder().intNum("login.id").eq(player.getId())
+            .and().intNum("game.id").eq(replay.getId()));
+    return fafApiAccessor.getMany(navigator)
+        .next()
+        .map(dto -> leaderboardMapper.map(dto, new CycleAvoidingMappingContext()))
+        .toFuture();
   }
 
   private CompletableFuture<List<LeagueEntryBean>> mapLeagueEntryDtoToBean(CompletableFuture<List<LeagueSeasonScore>> future) {

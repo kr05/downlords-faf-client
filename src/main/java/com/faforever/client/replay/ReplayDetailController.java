@@ -4,7 +4,7 @@ import com.faforever.client.config.ClientProperties;
 import com.faforever.client.domain.AbstractEntityBean;
 import com.faforever.client.domain.FeaturedModBean;
 import com.faforever.client.domain.GamePlayerStatsBean;
-import com.faforever.client.domain.GameResult;
+import com.faforever.client.domain.GameOutcome;
 import com.faforever.client.domain.LeagueScoreJournalBean;
 import com.faforever.client.domain.MapBean;
 import com.faforever.client.domain.MapVersionBean;
@@ -86,8 +86,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -480,7 +480,7 @@ public class ReplayDetailController extends NodeController<Node> {
 
       TeamCardController controller = uiService.loadFxml("theme/team_card.fxml");
 
-      controller.setTeamResult(calculateGameResult(statsByPlayer.keySet()));
+      controller.setTeamResult(calculateGameResult(statsByPlayer));
       controller.setRatingPrecision(RatingPrecision.EXACT);
       controller.setRatingProvider(player -> getPlayerRating(player, statsByPlayer));
       controller.setDivisionProvider(this::getPlayerDivision);
@@ -492,30 +492,38 @@ public class ReplayDetailController extends NodeController<Node> {
     }).toList();
   }
   
-  private GameResult calculateGameResult(Set<PlayerBean> playerBeans) {
-    int change;
-    if (replay.get().getLeagueScores() != null) {
-      change = replay
+  private GameOutcome calculateGameResult(Map<PlayerBean, GamePlayerStatsBean> statsByPlayer) {
+    if (!replay.get().getLeagueScores().isEmpty()) {
+      int result = replay
           .map(ReplayBean::getLeagueScores)
           .map(leagueScoreJournalBeans -> leagueScoreJournalBeans.stream()
-              .filter(leagueScoreJournalBean -> playerBeans.stream()
+              .filter(leagueScoreJournalBean -> statsByPlayer.keySet().stream()
                   .map(AbstractEntityBean::getId)
                   .toList()
                   .contains(leagueScoreJournalBean.getLoginId()))
               .map(this::extractResultFromJournal)
-              .reduce(0, Integer::sum)
-          ).getValue();
+              .reduce(0, Integer::sum))
+          .getValue();
+
+      if (result > 0) {
+        return GameOutcome.VICTORY;
+      } else if (result < 0) {
+        return GameOutcome.DEFEAT;
+      } else {
+        return GameOutcome.DRAW;
+      }
     } else {
-      // calculate from league player stats score changes
-      return GameResult.UNKNOWN;
-    }
-    
-    if (change > 0) {
-      return GameResult.VICTORY;
-    } else if (change < 0) {
-      return GameResult.DEFEAT;
-    } else {
-      return GameResult.DRAW;
+      Map<GameOutcome, Long> outcomeCounts = statsByPlayer.values()
+          .stream()
+          .map(GamePlayerStatsBean::getResult)
+          .filter(Objects::nonNull)
+          .map(gameOutcome -> (gameOutcome == GameOutcome.CONFLICTING) ? GameOutcome.UNKNOWN : gameOutcome)
+          .map(gameOutcome -> (gameOutcome == GameOutcome.MUTUAL_DRAW) ? GameOutcome.DRAW : gameOutcome)
+          .collect(Collectors.groupingBy(gameOutcome -> gameOutcome, Collectors.counting()));
+
+      return outcomeCounts.entrySet()
+          .stream()
+          .max(Entry.comparingByValue()).map(Entry::getKey).orElse(GameOutcome.UNKNOWN);
     }
   }
   
@@ -538,7 +546,7 @@ public class ReplayDetailController extends NodeController<Node> {
 
   private Integer getPlayerRating(PlayerBean player, Map<PlayerBean, GamePlayerStatsBean> statsByPlayerId) {
     GamePlayerStatsBean playerStats = statsByPlayerId.get(player);
-    if (replay.get().getLeagueScores() != null || playerStats == null) {
+    if (!replay.get().getLeagueScores().isEmpty() || playerStats == null) {
       return null;
     }
     return playerStats.getLeaderboardRatingJournals()

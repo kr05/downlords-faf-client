@@ -3,7 +3,7 @@ package com.faforever.client.game;
 
 import com.faforever.client.domain.GameBean;
 import com.faforever.client.domain.GamePlayerStatsBean;
-import com.faforever.client.domain.GameResult;
+import com.faforever.client.domain.GameOutcome;
 import com.faforever.client.domain.PlayerBean;
 import com.faforever.client.domain.SubdivisionBean;
 import com.faforever.client.fx.FxApplicationThreadExecutor;
@@ -69,7 +69,7 @@ public class TeamCardController extends NodeController<Node> {
   private final ObjectProperty<Function<PlayerBean, SubdivisionBean>> divisionProvider = new SimpleObjectProperty<>();
   private final ObjectProperty<Function<PlayerBean, Faction>> factionProvider = new SimpleObjectProperty<>();
   private final ObjectProperty<RatingPrecision> ratingPrecision = new SimpleObjectProperty<>();
-  private final ObjectProperty<GameResult> teamResult = new SimpleObjectProperty<>();
+  private final ObjectProperty<GameOutcome> teamResult = new SimpleObjectProperty<>();
   private final IntegerProperty teamId = new SimpleIntegerProperty();
   private final SimpleChangeListener<List<PlayerBean>> playersListener = this::populateTeamContainer;
   private final ObservableValue<Integer> teamRating = ratingProvider.flatMap(provider -> ratingPrecision.flatMap(precision -> players.map(playerBeans -> playerBeans.stream()
@@ -202,15 +202,15 @@ public class TeamCardController extends NodeController<Node> {
     return ratingProvider;
   }
 
-  public void setTeamResult(GameResult teamResult) {
+  public void setTeamResult(GameOutcome teamResult) {
     this.teamResult.set(teamResult);
   }
 
-  public GameResult getTeamResult() {
+  public GameOutcome getTeamResult() {
     return teamResult.get();
   }
 
-  public ObjectProperty<GameResult> teamResult() {
+  public ObjectProperty<GameOutcome> teamResult() {
     return teamResult;
   }
 

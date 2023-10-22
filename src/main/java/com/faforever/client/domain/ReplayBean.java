@@ -319,7 +319,6 @@ public class ReplayBean {
 
   public void setLeagueScores(List<LeagueScoreJournalBean> scores) {
     leagueScores.set(scores);
-    System.out.println(scores);
   }
 
   public record ChatMessage(Duration time, String sender, String message) {}

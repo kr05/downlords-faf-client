@@ -3,9 +3,11 @@ package com.faforever.client.game;
 
 import com.faforever.client.domain.GameBean;
 import com.faforever.client.domain.GamePlayerStatsBean;
+import com.faforever.client.domain.GameResult;
 import com.faforever.client.domain.PlayerBean;
 import com.faforever.client.domain.SubdivisionBean;
 import com.faforever.client.fx.FxApplicationThreadExecutor;
+import com.faforever.client.fx.JavaFxUtil;
 import com.faforever.client.fx.NodeController;
 import com.faforever.client.fx.SimpleChangeListener;
 import com.faforever.client.i18n.I18n;
@@ -19,6 +21,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.css.PseudoClass;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
@@ -44,6 +47,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class TeamCardController extends NodeController<Node> {
+
+  private static final PseudoClass VICTORY = PseudoClass.getPseudoClass("victory");
+  private static final PseudoClass DEFEAT = PseudoClass.getPseudoClass("defeat");
+  private static final PseudoClass DRAW = PseudoClass.getPseudoClass("draw");
+  private static final PseudoClass UNKNOWN = PseudoClass.getPseudoClass("unknown");
+  
   private final I18n i18n;
   private final PlayerService playerService;
   private final FxApplicationThreadExecutor fxApplicationThreadExecutor;
@@ -52,6 +61,7 @@ public class TeamCardController extends NodeController<Node> {
   public Pane teamPaneRoot;
   public VBox teamPane;
   public Label teamNameLabel;
+  public Label gameResultLabel;
 
   private final ObjectProperty<List<Integer>> playerIds = new SimpleObjectProperty<>(List.of());
   private final ObjectProperty<List<PlayerBean>> players = new SimpleObjectProperty<>(List.of());
@@ -59,6 +69,7 @@ public class TeamCardController extends NodeController<Node> {
   private final ObjectProperty<Function<PlayerBean, SubdivisionBean>> divisionProvider = new SimpleObjectProperty<>();
   private final ObjectProperty<Function<PlayerBean, Faction>> factionProvider = new SimpleObjectProperty<>();
   private final ObjectProperty<RatingPrecision> ratingPrecision = new SimpleObjectProperty<>();
+  private final ObjectProperty<GameResult> teamResult = new SimpleObjectProperty<>();
   private final IntegerProperty teamId = new SimpleIntegerProperty();
   private final SimpleChangeListener<List<PlayerBean>> playersListener = this::populateTeamContainer;
   private final ObservableValue<Integer> teamRating = ratingProvider.flatMap(provider -> ratingPrecision.flatMap(precision -> players.map(playerBeans -> playerBeans.stream()
@@ -66,6 +77,7 @@ public class TeamCardController extends NodeController<Node> {
       .filter(Objects::nonNull)
       .map(rating -> precision == RatingPrecision.ROUNDED ? RatingUtil.getRoundedRating(rating) : rating)
       .reduce(0, Integer::sum))));
+  // we need to set this null when no nunNull objects are found
 
   private final Map<PlayerBean, PlayerCardController> playerCardControllersMap = new HashMap<>();
 
@@ -77,13 +89,18 @@ public class TeamCardController extends NodeController<Node> {
           case GameBean.OBSERVERS_TEAM -> i18n.get("game.tooltip.observers");
           default -> {
             try {
-              yield i18n.get("game.tooltip.teamTitle", id.intValue() - 1, teamRating);
+              if (teamRating == null) {
+                yield i18n.get("game.tooltip.teamTitleNoRating", id.intValue() - 1);
+              } else {
+                yield i18n.get("game.tooltip.teamTitle", id.intValue() - 1, teamRating);
+              }
             } catch (NumberFormatException e) {
               yield "";
             }
           }
         })));
-
+    JavaFxUtil.bindManagedToVisible(gameResultLabel);
+    gameResultLabel.visibleProperty().bind(gameResultLabel.textProperty().isEmpty().not());
     players.addListener(playersListener);
   }
 
@@ -111,6 +128,27 @@ public class TeamCardController extends NodeController<Node> {
 
       return controller;
     }).toList();
+  }
+  
+  public void showGameResult() {
+    switch (teamResult.get()) {
+      case VICTORY -> {
+        gameResultLabel.setText(i18n.get("game.resultVictory"));
+        gameResultLabel.pseudoClassStateChanged(VICTORY, true);
+      }
+      case DEFEAT -> {
+        gameResultLabel.setText(i18n.get("game.resultDefeat"));
+        gameResultLabel.pseudoClassStateChanged(DEFEAT, true);
+      }
+      case DRAW -> {
+        gameResultLabel.setText(i18n.get("game.resultDraw"));
+        gameResultLabel.pseudoClassStateChanged(DRAW, true);
+      }
+      case UNKNOWN -> {
+        gameResultLabel.setText(i18n.get("game.resultUnknown"));
+        gameResultLabel.pseudoClassStateChanged(UNKNOWN, true);
+      }
+    }
   }
 
   public void bindPlayersToPlayerIds() {
@@ -162,6 +200,18 @@ public class TeamCardController extends NodeController<Node> {
 
   public ObjectProperty<Function<PlayerBean, Integer>> ratingProviderProperty() {
     return ratingProvider;
+  }
+
+  public void setTeamResult(GameResult teamResult) {
+    this.teamResult.set(teamResult);
+  }
+
+  public GameResult getTeamResult() {
+    return teamResult.get();
+  }
+
+  public ObjectProperty<GameResult> teamResult() {
+    return teamResult;
   }
 
   public void setStats(List<GamePlayerStatsBean> teamPlayerStats) {

@@ -517,7 +517,7 @@ public class ReplayDetailController extends NodeController<Node> {
 
   private Integer getPlayerRating(PlayerBean player, Map<PlayerBean, GamePlayerStatsBean> statsByPlayerId) {
     GamePlayerStatsBean playerStats = statsByPlayerId.get(player);
-    if (!replay.get().getLeagueScores().isEmpty() || playerStats == null) {
+    if (replay.get().getLeagueScores() != null || playerStats == null) {
       return null;
     }
     return playerStats.getLeaderboardRatingJournals()
@@ -598,7 +598,7 @@ public class ReplayDetailController extends NodeController<Node> {
 
   public void showRatingChange() {
     teamCardControllers.forEach(TeamCardController::showGameResult);
-    if (replay.get().getLeagueScores().isEmpty()) {
+    if (replay.get().getLeagueScores() == null) {
       Map<String, List<GamePlayerStatsBean>> teamsValue = teams.get();
       teamCardControllers.forEach(teamCardController -> teamCardController.setStats(
         teamsValue.get(String.valueOf(teamCardController.getTeamId()))));

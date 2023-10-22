@@ -337,7 +337,7 @@ public class ReplayDetailController extends NodeController<Node> {
           newValue.setLeagueScores(scores);
           // This looks a bit ugly. Ideally we should wait with drawing the window until we have the league scores,
           // then we don't need to trigger a redraw here
-//          populateTeamsContainer(teams.getValue());
+          populateTeamsContainer(teams.getValue());
         }));
 
     reviewsController.setCanWriteReview(true);

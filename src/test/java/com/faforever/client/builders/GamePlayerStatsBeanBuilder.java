@@ -1,5 +1,6 @@
 package com.faforever.client.builders;
 
+import com.faforever.client.domain.GameOutcome;
 import com.faforever.client.domain.GamePlayerStatsBean;
 import com.faforever.client.domain.LeaderboardRatingJournalBean;
 import com.faforever.client.domain.PlayerBean;
@@ -23,6 +24,7 @@ public class GamePlayerStatsBeanBuilder {
     team(0);
     faction(Faction.CYBRAN);
     scoreTime(OffsetDateTime.now().minusDays(1));
+    result(GameOutcome.VICTORY);
     return this;
   }
 
@@ -48,6 +50,11 @@ public class GamePlayerStatsBeanBuilder {
 
   public GamePlayerStatsBeanBuilder scoreTime(OffsetDateTime scoreTime) {
     gamePlayerStatsBean.setScoreTime(scoreTime);
+    return this;
+  }
+  
+  public GamePlayerStatsBeanBuilder result(GameOutcome result) {
+    gamePlayerStatsBean.setResult(result);
     return this;
   }
 

@@ -85,6 +85,7 @@ public class PlayerCardController extends NodeController<Node> {
   private final ObjectProperty<Faction> faction = new SimpleObjectProperty<>();
   private final Tooltip noteTooltip = new Tooltip();
   private final Tooltip avatarTooltip = new Tooltip();
+  private final Tooltip divisionTooltip = new Tooltip();
 
   @Override
   protected void onInitialize() {
@@ -141,6 +142,13 @@ public class PlayerCardController extends NodeController<Node> {
     avatarTooltip.setShowDelay(Duration.ZERO);
     avatarTooltip.setShowDuration(Duration.seconds(30));
     Tooltip.install(avatarImageView, avatarTooltip);
+
+    divisionTooltip.textProperty().bind(
+        division.map(value -> i18n.get("leaderboard.divisionName", i18n.get(value.getDivisionI18nKey()), value.getNameKey()))
+            .when(showing));
+    divisionTooltip.setShowDelay(Duration.ZERO);
+    divisionTooltip.setShowDuration(Duration.seconds(30));
+    Tooltip.install(divisionImageView, divisionTooltip);
   }
 
   private void onNoteChanged(String newValue) {

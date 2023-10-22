@@ -463,6 +463,10 @@ public class ReplayDetailController extends NodeController<Node> {
   private void populateTeamsContainer(Map<String, List<GamePlayerStatsBean>> newValue) {
     CompletableFuture.supplyAsync(() -> createTeamCardControllers(newValue)).thenAcceptAsync(controllers -> {
       teamCardControllers.clear();
+      if (controllers.stream()
+          .map(TeamCardController::getTeamResult).noneMatch(gameOutcome -> gameOutcome != GameOutcome.DEFEAT)) {
+        controllers.forEach(teamCardController -> teamCardController.setTeamResult(GameOutcome.DRAW));
+      }
       teamCardControllers.addAll(controllers);
       teamsContainer.getChildren().setAll(teamCardControllers.stream().map(TeamCardController::getRoot).toList());
     }, fxApplicationThreadExecutor);
@@ -493,26 +497,6 @@ public class ReplayDetailController extends NodeController<Node> {
   }
   
   private GameOutcome calculateGameResult(Map<PlayerBean, GamePlayerStatsBean> statsByPlayer) {
-    if (!replay.get().getLeagueScores().isEmpty()) {
-      int result = replay
-          .map(ReplayBean::getLeagueScores)
-          .map(leagueScoreJournalBeans -> leagueScoreJournalBeans.stream()
-              .filter(leagueScoreJournalBean -> statsByPlayer.keySet().stream()
-                  .map(AbstractEntityBean::getId)
-                  .toList()
-                  .contains(leagueScoreJournalBean.getLoginId()))
-              .map(this::extractResultFromJournal)
-              .reduce(0, Integer::sum))
-          .getValue();
-
-      if (result > 0) {
-        return GameOutcome.VICTORY;
-      } else if (result < 0) {
-        return GameOutcome.DEFEAT;
-      } else {
-        return GameOutcome.DRAW;
-      }
-    } else {
       Map<GameOutcome, Long> outcomeCounts = statsByPlayer.values()
           .stream()
           .map(GamePlayerStatsBean::getResult)
@@ -524,19 +508,6 @@ public class ReplayDetailController extends NodeController<Node> {
       return outcomeCounts.entrySet()
           .stream()
           .max(Entry.comparingByValue()).map(Entry::getKey).orElse(GameOutcome.UNKNOWN);
-    }
-  }
-  
-  private int extractResultFromJournal(LeagueScoreJournalBean journalEntry) {
-    int result;
-    if (journalEntry.getDivisionAfter() == journalEntry.getDivisionBefore()) {
-      result = Integer.compare(journalEntry.getScoreAfter(), journalEntry.getScoreBefore());
-    } else if (journalEntry.getDivisionAfter().getDivision() == journalEntry.getDivisionBefore().getDivision()) {
-      result = Integer.compare(journalEntry.getDivisionAfter().getIndex(), journalEntry.getDivisionBefore().getIndex());
-    } else {
-      result = Integer.compare(journalEntry.getDivisionAfter().getDivision().getIndex(), journalEntry.getDivisionBefore().getDivision().getIndex());
-    }
-    return result;
   }
 
   private Faction getPlayerFaction(PlayerBean player, Map<PlayerBean, GamePlayerStatsBean> statsByPlayerId) {

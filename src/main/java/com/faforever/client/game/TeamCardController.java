@@ -140,11 +140,11 @@ public class TeamCardController extends NodeController<Node> {
         gameResultLabel.setText(i18n.get("game.resultDefeat"));
         gameResultLabel.pseudoClassStateChanged(DEFEAT, true);
       }
-      case DRAW -> {
+      case DRAW, MUTUAL_DRAW -> {
         gameResultLabel.setText(i18n.get("game.resultDraw"));
         gameResultLabel.pseudoClassStateChanged(DRAW, true);
       }
-      case UNKNOWN -> {
+      default -> {
         gameResultLabel.setText(i18n.get("game.resultUnknown"));
         gameResultLabel.pseudoClassStateChanged(UNKNOWN, true);
       }

@@ -1,7 +1,6 @@
 package com.faforever.client.replay;
 
 import com.faforever.client.config.ClientProperties;
-import com.faforever.client.domain.AbstractEntityBean;
 import com.faforever.client.domain.FeaturedModBean;
 import com.faforever.client.domain.GamePlayerStatsBean;
 import com.faforever.client.domain.GameOutcome;

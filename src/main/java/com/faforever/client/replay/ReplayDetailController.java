@@ -504,6 +504,10 @@ public class ReplayDetailController extends NodeController<Node> {
           .map(gameOutcome -> (gameOutcome == GameOutcome.CONFLICTING) ? GameOutcome.UNKNOWN : gameOutcome)
           .map(gameOutcome -> (gameOutcome == GameOutcome.MUTUAL_DRAW) ? GameOutcome.DRAW : gameOutcome)
           .collect(Collectors.groupingBy(gameOutcome -> gameOutcome, Collectors.counting()));
+      
+      if (outcomeCounts.containsKey(GameOutcome.VICTORY)) {
+        return GameOutcome.VICTORY;
+      }
 
       return outcomeCounts.entrySet()
           .stream()

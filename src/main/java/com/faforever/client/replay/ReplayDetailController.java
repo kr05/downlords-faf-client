@@ -494,23 +494,25 @@ public class ReplayDetailController extends NodeController<Node> {
       return controller;
     }).toList();
   }
-  
-  private GameOutcome calculateGameResult(Map<PlayerBean, GamePlayerStatsBean> statsByPlayer) {
-      Map<GameOutcome, Long> outcomeCounts = statsByPlayer.values()
-          .stream()
-          .map(GamePlayerStatsBean::getResult)
-          .filter(Objects::nonNull)
-          .map(gameOutcome -> (gameOutcome == GameOutcome.CONFLICTING) ? GameOutcome.UNKNOWN : gameOutcome)
-          .map(gameOutcome -> (gameOutcome == GameOutcome.MUTUAL_DRAW) ? GameOutcome.DRAW : gameOutcome)
-          .collect(Collectors.groupingBy(gameOutcome -> gameOutcome, Collectors.counting()));
-      
-      if (outcomeCounts.containsKey(GameOutcome.VICTORY)) {
-        return GameOutcome.VICTORY;
-      }
 
-      return outcomeCounts.entrySet()
-          .stream()
-          .max(Entry.comparingByValue()).map(Entry::getKey).orElse(GameOutcome.UNKNOWN);
+  private GameOutcome calculateGameResult(Map<PlayerBean, GamePlayerStatsBean> statsByPlayer) {
+    // Game outcomes are saved since 2020, so this should suffice for the 
+    // vast majority of replays that people will realistically look up.
+    Map<GameOutcome, Long> outcomeCounts = statsByPlayer.values()
+        .stream()
+        .map(GamePlayerStatsBean::getResult)
+        .filter(Objects::nonNull)
+        .map(gameOutcome -> (gameOutcome == GameOutcome.CONFLICTING) ? GameOutcome.UNKNOWN : gameOutcome)
+        .map(gameOutcome -> (gameOutcome == GameOutcome.MUTUAL_DRAW) ? GameOutcome.DRAW : gameOutcome)
+        .collect(Collectors.groupingBy(gameOutcome -> gameOutcome, Collectors.counting()));
+
+    if (outcomeCounts.containsKey(GameOutcome.VICTORY)) {
+      return GameOutcome.VICTORY;
+    }
+
+    return outcomeCounts.entrySet()
+        .stream()
+        .max(Entry.comparingByValue()).map(Entry::getKey).orElse(GameOutcome.UNKNOWN);
   }
 
   private Faction getPlayerFaction(PlayerBean player, Map<PlayerBean, GamePlayerStatsBean> statsByPlayerId) {

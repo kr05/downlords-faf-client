@@ -52,7 +52,8 @@ public class TeamCardController extends NodeController<Node> {
   private static final PseudoClass DEFEAT = PseudoClass.getPseudoClass("defeat");
   private static final PseudoClass DRAW = PseudoClass.getPseudoClass("draw");
   private static final PseudoClass UNKNOWN = PseudoClass.getPseudoClass("unknown");
-  
+  private static final int UNSET = -1000000;
+
   private final I18n i18n;
   private final PlayerService playerService;
   private final FxApplicationThreadExecutor fxApplicationThreadExecutor;
@@ -76,8 +77,7 @@ public class TeamCardController extends NodeController<Node> {
       .map(provider)
       .filter(Objects::nonNull)
       .map(rating -> precision == RatingPrecision.ROUNDED ? RatingUtil.getRoundedRating(rating) : rating)
-      .reduce(0, Integer::sum))));
-  // we need to set this null when no nunNull objects are found
+      .reduce(Integer::sum).orElse(UNSET))));
 
   private final Map<PlayerBean, PlayerCardController> playerCardControllersMap = new HashMap<>();
 
@@ -89,7 +89,7 @@ public class TeamCardController extends NodeController<Node> {
           case GameBean.OBSERVERS_TEAM -> i18n.get("game.tooltip.observers");
           default -> {
             try {
-              if (teamRating == null) {
+              if (teamRating == UNSET) {
                 yield i18n.get("game.tooltip.teamTitleNoRating", id.intValue() - 1);
               } else {
                 yield i18n.get("game.tooltip.teamTitle", id.intValue() - 1, teamRating);

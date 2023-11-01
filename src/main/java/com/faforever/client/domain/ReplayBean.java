@@ -64,7 +64,7 @@ public class ReplayBean {
       .boxed()
       .findFirst()
       .orElse(null));
-  ObjectProperty<List<LeagueScoreJournalBean>> leagueScores = new SimpleObjectProperty<>();
+  ReadOnlyObjectWrapper<List<LeagueScoreJournalBean>> leagueScores = new ReadOnlyObjectWrapper<>(List.of());
 
   public static String getReplayUrl(int replayId, String baseUrlFormat) {
     return String.format(baseUrlFormat, replayId);
@@ -313,12 +313,12 @@ public class ReplayBean {
     return leagueScores.get();
   }
 
-  public ObjectProperty<List<LeagueScoreJournalBean>> leagueScoresProperty() {
-    return leagueScores;
+  public ReadOnlyObjectProperty<List<LeagueScoreJournalBean>> leagueScoresProperty() {
+    return leagueScores.getReadOnlyProperty();
   }
 
   public void setLeagueScores(List<LeagueScoreJournalBean> scores) {
-    leagueScores.set(scores);
+    this.leagueScores.set(scores == null ? List.of() : List.copyOf(scores));
   }
 
   public record ChatMessage(Duration time, String sender, String message) {}

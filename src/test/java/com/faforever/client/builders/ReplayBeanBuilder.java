@@ -2,6 +2,7 @@ package com.faforever.client.builders;
 
 import com.faforever.client.domain.FeaturedModBean;
 import com.faforever.client.domain.GamePlayerStatsBean;
+import com.faforever.client.domain.LeagueScoreJournalBean;
 import com.faforever.client.domain.MapVersionBean;
 import com.faforever.client.domain.PlayerBean;
 import com.faforever.client.domain.ReplayBean;
@@ -36,6 +37,7 @@ public class ReplayBeanBuilder {
     chatMessages(ReplayChatMessageListBuilder.create().defaultValues().get());
     teamPlayerStats(PlayerStatsMapBuilder.create().defaultValues().get());
     gameOptions(GameOptionListBuilder.create().defaultValues().get());
+    leagueScores(LeagueScoresListBuilder.create().defaultValues().get());
     return this;
   }
 
@@ -126,6 +128,11 @@ public class ReplayBeanBuilder {
 
   public ReplayBeanBuilder local(boolean local) {
     replayBean.setLocal(local);
+    return this;
+  }
+  
+  public ReplayBeanBuilder leagueScores(List<LeagueScoreJournalBean> leagueScores) {
+    replayBean.setLeagueScores(leagueScores);
     return this;
   }
 

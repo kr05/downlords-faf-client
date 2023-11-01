@@ -24,6 +24,7 @@ import com.faforever.client.game.RatingPrecision;
 import com.faforever.client.game.TeamCardController;
 import com.faforever.client.i18n.I18n;
 import com.faforever.client.leaderboard.LeaderboardService;
+import com.faforever.client.main.event.DeleteLocalReplayEvent;
 import com.faforever.client.map.MapService;
 import com.faforever.client.map.MapService.PreviewSize;
 import com.faforever.client.map.generator.MapGeneratorService;
@@ -102,7 +103,6 @@ public class ReplayDetailController extends NodeController<Node> {
   private final UiService uiService;
   private final ReplayService replayService;
   private final RatingService ratingService;
-  private final LeaderboardService leaderboardService;
   private final MapService mapService;
   private final MapGeneratorService mapGeneratorService;
   private final PlayerService playerService;
@@ -330,9 +330,9 @@ public class ReplayDetailController extends NodeController<Node> {
     if (newValue.getReplayFile() != null) {
       enrichReplayLater(newValue.getReplayFile(), newValue);
     }
-
+    
     newValue.setLeagueScores(null);
-    leaderboardService.getLeagueScoreJournalForReplay(newValue)
+    replayService.getLeagueScoreJournalForReplay(newValue)
         .thenAccept(scores -> Platform.runLater(() -> {
           newValue.setLeagueScores(scores);
           // This looks a bit ugly. Ideally we should wait with drawing the window until we have the league scores,

@@ -3,12 +3,14 @@ package com.faforever.client.mapstruct;
 import com.faforever.client.domain.FeaturedModBean;
 import com.faforever.client.domain.GamePlayerStatsBean;
 import com.faforever.client.domain.LeaderboardRatingJournalBean;
+import com.faforever.client.domain.LeagueScoreJournalBean;
 import com.faforever.client.domain.MapVersionBean;
 import com.faforever.client.domain.PlayerBean;
 import com.faforever.client.domain.ReplayBean;
 import com.faforever.commons.api.dto.Faction;
 import com.faforever.commons.api.dto.Game;
 import com.faforever.commons.api.dto.GamePlayerStats;
+import com.faforever.commons.api.dto.LeagueScoreJournal;
 import com.faforever.commons.replay.ChatMessage;
 import com.faforever.commons.replay.GameOption;
 import com.faforever.commons.replay.ReplayDataParser;
@@ -69,6 +71,16 @@ public interface ReplayMapper {
     return playerStats.stream()
         .collect(Collectors.groupingBy(gamePlayerStats -> String.valueOf(gamePlayerStats.getTeam()), Collectors.mapping(gamePlayerStats -> map(gamePlayerStats, context), Collectors.toList())));
   }
+
+  @Mapping(target = "season", source = "leagueSeason")
+  @Mapping(target = "divisionBefore", source = "leagueSeasonDivisionSubdivisionBefore")
+  @Mapping(target = "divisionAfter", source = "leagueSeasonDivisionSubdivisionAfter")
+  LeagueScoreJournalBean map(LeagueScoreJournal source, @Context CycleAvoidingMappingContext context);
+
+  @Mapping(target = "leagueSeason", source = "season")
+  @Mapping(target = "leagueSeasonDivisionSubdivisionBefore", source = "divisionBefore")
+  @Mapping(target = "leagueSeasonDivisionSubdivisionAfter", source = "divisionAfter")
+  LeagueScoreJournal map(LeagueScoreJournalBean source, @Context CycleAvoidingMappingContext context);
 
   @Mapping(target = "local", constant = "true")
   @Mapping(target = "id", source = "parser.metadata.uid")

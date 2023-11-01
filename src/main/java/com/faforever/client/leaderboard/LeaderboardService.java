@@ -224,15 +224,6 @@ public class LeaderboardService {
         .toFuture()
     );
   }
-  
-  public CompletableFuture<List<LeagueScoreJournalBean>> getLeagueScoreJournalForReplay(ReplayBean replay) {
-    ElideNavigatorOnCollection<LeagueScoreJournal> navigator = ElideNavigator.of(LeagueScoreJournal.class).collection()
-        .setFilter(qBuilder().intNum("gameId").eq(replay.getId()));
-    return fafApiAccessor.getMany(navigator)
-        .map(dto -> leaderboardMapper.map(dto, new CycleAvoidingMappingContext()))
-        .collectList()
-        .toFuture();
-  }
 
   private CompletableFuture<List<LeagueEntryBean>> mapLeagueEntryDtoToBean(CompletableFuture<List<LeagueSeasonScore>> future) {
     return future.thenCompose(leagueSeasonScores -> {

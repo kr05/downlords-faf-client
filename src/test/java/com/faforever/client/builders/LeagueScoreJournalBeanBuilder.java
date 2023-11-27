@@ -5,11 +5,11 @@ import com.faforever.client.domain.LeagueSeasonBean;
 import com.faforever.client.domain.SubdivisionBean;
 
 public class LeagueScoreJournalBeanBuilder {
+  private final LeagueScoreJournalBean leagueScoreJournalBean = new LeagueScoreJournalBean();
+  
   public static LeagueScoreJournalBeanBuilder create() {
     return new LeagueScoreJournalBeanBuilder();
   }
-  
-  private final LeagueScoreJournalBean leagueScoreJournalBean = new LeagueScoreJournalBean();
 
   public LeagueScoreJournalBeanBuilder defaultValues() {
     gameId(1);

@@ -70,7 +70,7 @@ public class TeamCardController extends NodeController<Node> {
   private final ObjectProperty<Function<PlayerBean, SubdivisionBean>> divisionProvider = new SimpleObjectProperty<>();
   private final ObjectProperty<Function<PlayerBean, Faction>> factionProvider = new SimpleObjectProperty<>();
   private final ObjectProperty<RatingPrecision> ratingPrecision = new SimpleObjectProperty<>();
-  private final ObjectProperty<GameOutcome> teamResult = new SimpleObjectProperty<>();
+  private final ObjectProperty<GameOutcome> teamOutcome = new SimpleObjectProperty<>();
   private final IntegerProperty teamId = new SimpleIntegerProperty();
   private final SimpleChangeListener<List<PlayerBean>> playersListener = this::populateTeamContainer;
   private final ObservableValue<Integer> teamRating = ratingProvider.flatMap(provider -> ratingPrecision.flatMap(precision -> players.map(playerBeans -> playerBeans.stream()
@@ -131,7 +131,7 @@ public class TeamCardController extends NodeController<Node> {
   }
   
   public void showGameResult() {
-    switch (teamResult.get()) {
+    switch (teamOutcome.get()) {
       case VICTORY -> {
         gameResultLabel.setText(i18n.get("game.resultVictory"));
         gameResultLabel.pseudoClassStateChanged(VICTORY, true);
@@ -202,16 +202,16 @@ public class TeamCardController extends NodeController<Node> {
     return ratingProvider;
   }
 
-  public void setTeamResult(GameOutcome teamResult) {
-    this.teamResult.set(teamResult);
+  public void setTeamOutcome(GameOutcome teamOutcome) {
+    this.teamOutcome.set(teamOutcome);
   }
 
-  public GameOutcome getTeamResult() {
-    return teamResult.get();
+  public GameOutcome getTeamOutcome() {
+    return teamOutcome.get();
   }
 
   public ObjectProperty<GameOutcome> teamResult() {
-    return teamResult;
+    return teamOutcome;
   }
 
   public void setStats(List<GamePlayerStatsBean> teamPlayerStats) {

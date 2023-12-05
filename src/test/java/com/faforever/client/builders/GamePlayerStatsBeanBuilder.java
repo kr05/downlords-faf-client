@@ -53,8 +53,8 @@ public class GamePlayerStatsBeanBuilder {
     return this;
   }
   
-  public GamePlayerStatsBeanBuilder result(GameOutcome result) {
-    gamePlayerStatsBean.setResult(result);
+  public GamePlayerStatsBeanBuilder result(GameOutcome outcome) {
+    gamePlayerStatsBean.setOutcome(outcome);
     return this;
   }
 

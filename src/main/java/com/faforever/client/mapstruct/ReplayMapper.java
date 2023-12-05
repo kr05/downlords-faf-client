@@ -159,8 +159,10 @@ public interface ReplayMapper {
   @Mapping(target = "name", source = "title")
   Game map(ReplayBean bean, @Context CycleAvoidingMappingContext context);
 
+  @Mapping(target = "outcome", source = "result")
   GamePlayerStatsBean map(GamePlayerStats dto, @Context CycleAvoidingMappingContext context);
 
+  @Mapping(target = "result", source = "outcome")
   GamePlayerStats map(GamePlayerStatsBean bean, @Context CycleAvoidingMappingContext context);
 
   @Qualifier

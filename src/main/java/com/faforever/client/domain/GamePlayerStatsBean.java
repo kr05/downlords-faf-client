@@ -23,7 +23,7 @@ public class GamePlayerStatsBean {
   private final IntegerProperty team = new SimpleIntegerProperty();
   private final ObjectProperty<Faction> faction = new SimpleObjectProperty<>();
   private final ObjectProperty<OffsetDateTime> scoreTime = new SimpleObjectProperty<>();
-  ObjectProperty<GameOutcome> result = new SimpleObjectProperty<>();
+  ObjectProperty<GameOutcome> outcome = new SimpleObjectProperty<>();
   @EqualsAndHashCode.Include
   @ToString.Include
   private final ObjectProperty<ReplayBean> game = new SimpleObjectProperty<>();
@@ -89,16 +89,16 @@ public class GamePlayerStatsBean {
     this.scoreTime.set(scoreTime);
   }
 
-  public GameOutcome getResult() {
-    return result.get();
+  public GameOutcome getOutcome() {
+    return outcome.get();
   }
 
-  public ObjectProperty<GameOutcome> resultProperty() {
-    return result;
+  public ObjectProperty<GameOutcome> outcomeProperty() {
+    return outcome;
   }
 
-  public void setResult(GameOutcome outcome) {
-    result.set(outcome);
+  public void setOutcome(GameOutcome outcome) {
+    this.outcome.set(outcome);
   }
 
   public ReplayBean getGame() {

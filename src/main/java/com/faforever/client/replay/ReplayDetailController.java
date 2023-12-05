@@ -45,6 +45,7 @@ import com.faforever.client.vault.review.ReviewsController;
 import com.faforever.commons.api.dto.Faction;
 import com.faforever.commons.api.dto.Validity;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.eventbus.EventBus;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
@@ -333,12 +334,12 @@ public class ReplayDetailController extends NodeController<Node> {
     
     newValue.setLeagueScores(null);
     replayService.getLeagueScoreJournalForReplay(newValue)
-        .thenAccept(scores -> Platform.runLater(() -> {
+        .thenAcceptAsync(scores -> {
           newValue.setLeagueScores(scores);
           // This looks a bit ugly. Ideally we should wait with drawing the window until we have the league scores,
           // then we don't need to trigger a redraw here
           populateTeamsContainer(teams.getValue());
-        }));
+        }, fxApplicationThreadExecutor);
 
     reviewsController.setCanWriteReview(true);
 
@@ -464,8 +465,8 @@ public class ReplayDetailController extends NodeController<Node> {
     CompletableFuture.supplyAsync(() -> createTeamCardControllers(newValue)).thenAcceptAsync(controllers -> {
       teamCardControllers.clear();
       if (controllers.stream()
-          .map(TeamCardController::getTeamResult).noneMatch(gameOutcome -> gameOutcome != GameOutcome.DEFEAT)) {
-        controllers.forEach(teamCardController -> teamCardController.setTeamResult(GameOutcome.DRAW));
+          .map(TeamCardController::getTeamOutcome).noneMatch(gameOutcome -> gameOutcome != GameOutcome.DEFEAT)) {
+        controllers.forEach(teamCardController -> teamCardController.setTeamOutcome(GameOutcome.DRAW));
       }
       teamCardControllers.addAll(controllers);
       teamsContainer.getChildren().setAll(teamCardControllers.stream().map(TeamCardController::getRoot).toList());
@@ -484,7 +485,7 @@ public class ReplayDetailController extends NodeController<Node> {
 
       TeamCardController controller = uiService.loadFxml("theme/team_card.fxml");
 
-      controller.setTeamResult(calculateGameResult(statsByPlayer));
+      controller.setTeamOutcome(calculateTeamOutcome(statsByPlayer.values()));
       controller.setRatingPrecision(RatingPrecision.EXACT);
       controller.setRatingProvider(player -> getPlayerRating(player, statsByPlayer));
       controller.setDivisionProvider(this::getPlayerDivision);
@@ -496,12 +497,11 @@ public class ReplayDetailController extends NodeController<Node> {
     }).toList();
   }
 
-  private GameOutcome calculateGameResult(Map<PlayerBean, GamePlayerStatsBean> statsByPlayer) {
+  private GameOutcome calculateTeamOutcome(Collection<GamePlayerStatsBean> statsByPlayer) {
     // Game outcomes are saved since 2020, so this should suffice for the 
     // vast majority of replays that people will realistically look up.
-    Map<GameOutcome, Long> outcomeCounts = statsByPlayer.values()
-        .stream()
-        .map(GamePlayerStatsBean::getResult)
+    Map<GameOutcome, Long> outcomeCounts = statsByPlayer.stream()
+        .map(GamePlayerStatsBean::getOutcome)
         .filter(Objects::nonNull)
         .map(gameOutcome -> (gameOutcome == GameOutcome.CONFLICTING) ? GameOutcome.UNKNOWN : gameOutcome)
         .map(gameOutcome -> (gameOutcome == GameOutcome.MUTUAL_DRAW) ? GameOutcome.DRAW : gameOutcome)

@@ -37,7 +37,7 @@ public class ReplayBeanBuilder {
     chatMessages(ReplayChatMessageListBuilder.create().defaultValues().get());
     teamPlayerStats(PlayerStatsMapBuilder.create().defaultValues().get());
     gameOptions(GameOptionListBuilder.create().defaultValues().get());
-    leagueScores(LeagueScoresListBuilder.create().defaultValues().get());
+    leagueScores(List.of(LeagueScoreJournalBeanBuilder.create().defaultValues().get()));
     return this;
   }
 

@@ -23,7 +23,7 @@ public class GamePlayerStatsBean {
   private final IntegerProperty team = new SimpleIntegerProperty();
   private final ObjectProperty<Faction> faction = new SimpleObjectProperty<>();
   private final ObjectProperty<OffsetDateTime> scoreTime = new SimpleObjectProperty<>();
-  ObjectProperty<GameOutcome> outcome = new SimpleObjectProperty<>();
+  private final ObjectProperty<GameOutcome> outcome = new SimpleObjectProperty<>();
   @EqualsAndHashCode.Include
   @ToString.Include
   private final ObjectProperty<ReplayBean> game = new SimpleObjectProperty<>();

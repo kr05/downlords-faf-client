@@ -6,20 +6,18 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import lombok.Value;
 
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true, callSuper = true)
-@Value
-public class LeagueScoreJournalBean extends AbstractEntityBean<LeagueScoreJournalBean> {
-  IntegerProperty gameId = new SimpleIntegerProperty();
-  IntegerProperty loginId = new SimpleIntegerProperty();
-  IntegerProperty gameCount = new SimpleIntegerProperty();
-  IntegerProperty scoreBefore = new SimpleIntegerProperty();
-  IntegerProperty scoreAfter = new SimpleIntegerProperty();
-  ObjectProperty<LeagueSeasonBean> season = new SimpleObjectProperty<>();
-  ObjectProperty<SubdivisionBean> divisionBefore = new SimpleObjectProperty<>();
-  ObjectProperty<SubdivisionBean> divisionAfter = new SimpleObjectProperty<>();
+public class LeagueScoreJournalBean extends AbstractEntityBean {
+  private final IntegerProperty gameId = new SimpleIntegerProperty();
+  private final IntegerProperty loginId = new SimpleIntegerProperty();
+  private final IntegerProperty gameCount = new SimpleIntegerProperty();
+  private final IntegerProperty scoreBefore = new SimpleIntegerProperty();
+  private final IntegerProperty scoreAfter = new SimpleIntegerProperty();
+  private final ObjectProperty<LeagueSeasonBean> season = new SimpleObjectProperty<>();
+  private final ObjectProperty<SubdivisionBean> divisionBefore = new SimpleObjectProperty<>();
+  private final ObjectProperty<SubdivisionBean> divisionAfter = new SimpleObjectProperty<>();
   
   public int getGameId() {
     return gameId.get();

@@ -51,6 +51,7 @@ public class ReplayBean {
   private final ObjectProperty<Validity> validity = new SimpleObjectProperty<>();
   private final ObjectProperty<ReplayReviewsSummaryBean> gameReviewsSummary = new SimpleObjectProperty<>();
   private final BooleanProperty local = new SimpleBooleanProperty();
+  private final ReadOnlyObjectWrapper<List<LeagueScoreJournalBean>> leagueScores = new ReadOnlyObjectWrapper<>(List.of());
   ObservableValue<Integer> numPlayers = teams.map(team -> team.values().stream().mapToInt(Collection::size).sum())
       .orElse(0);
   ObservableValue<Double> averageRating = teamPlayerStats.map(playerStats -> playerStats.values()
@@ -64,7 +65,6 @@ public class ReplayBean {
       .boxed()
       .findFirst()
       .orElse(null));
-  ReadOnlyObjectWrapper<List<LeagueScoreJournalBean>> leagueScores = new ReadOnlyObjectWrapper<>(List.of());
 
   public static String getReplayUrl(int replayId, String baseUrlFormat) {
     return String.format(baseUrlFormat, replayId);

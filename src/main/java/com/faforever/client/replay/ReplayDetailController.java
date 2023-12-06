@@ -536,13 +536,12 @@ public class ReplayDetailController extends NodeController<Node> {
   }
 
   private SubdivisionBean getPlayerDivision(PlayerBean player) {
-    return replay.map(ReplayBean::getLeagueScores).map(leagueScoreJournalBeans -> leagueScoreJournalBeans
+    return replay.get().getLeagueScores()
         .stream()
         .filter(leagueScoreJournalBean -> leagueScoreJournalBean.getLoginId() == player.getId())
         .findFirst()
         .map(LeagueScoreJournalBean::getDivisionBefore)
-        .orElse(null)
-    ).getValue();
+        .orElse(null);
   }
 
   public void onReport() {

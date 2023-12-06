@@ -135,17 +135,29 @@ public class TeamCardController extends NodeController<Node> {
       case VICTORY -> {
         gameResultLabel.setText(i18n.get("game.resultVictory"));
         gameResultLabel.pseudoClassStateChanged(VICTORY, true);
+        gameResultLabel.pseudoClassStateChanged(DEFEAT, false);
+        gameResultLabel.pseudoClassStateChanged(DRAW, false);
+        gameResultLabel.pseudoClassStateChanged(UNKNOWN, false);
       }
       case DEFEAT -> {
         gameResultLabel.setText(i18n.get("game.resultDefeat"));
+        gameResultLabel.pseudoClassStateChanged(VICTORY, false);
         gameResultLabel.pseudoClassStateChanged(DEFEAT, true);
+        gameResultLabel.pseudoClassStateChanged(DRAW, false);
+        gameResultLabel.pseudoClassStateChanged(UNKNOWN, false);
       }
       case DRAW, MUTUAL_DRAW -> {
         gameResultLabel.setText(i18n.get("game.resultDraw"));
+        gameResultLabel.pseudoClassStateChanged(VICTORY, false);
+        gameResultLabel.pseudoClassStateChanged(DEFEAT, false);
         gameResultLabel.pseudoClassStateChanged(DRAW, true);
+        gameResultLabel.pseudoClassStateChanged(UNKNOWN, false);
       }
       default -> {
         gameResultLabel.setText(i18n.get("game.resultUnknown"));
+        gameResultLabel.pseudoClassStateChanged(VICTORY, false);
+        gameResultLabel.pseudoClassStateChanged(DEFEAT, false);
+        gameResultLabel.pseudoClassStateChanged(DRAW, false);
         gameResultLabel.pseudoClassStateChanged(UNKNOWN, true);
       }
     }

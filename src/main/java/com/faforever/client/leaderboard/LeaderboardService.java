@@ -231,7 +231,7 @@ public class LeaderboardService {
           .stream()
           .map(LeagueSeasonScore::getLoginId)
           .collect(Collectors.toList());
-      return playerService.getPlayersByIds(playerIds).thenApply(playerBeans ->
+      return playerService.getPlayersByIds(playerIds).collectList().toFuture().thenApply(playerBeans ->
           leagueSeasonScores
               .stream()
               .flatMap(leagueSeasonScore ->

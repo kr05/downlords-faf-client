@@ -17,9 +17,9 @@ import reactor.core.publisher.Flux;
 
 import java.net.URL;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static com.faforever.commons.api.elide.ElideNavigator.qBuilder;
 import static org.hamcrest.CoreMatchers.is;
@@ -56,7 +56,9 @@ public class AchievementServiceTest extends ServiceTest {
     when(fafApiAccessor.getMany(any())).thenReturn(Flux.fromIterable(achievements));
     when(fafApiAccessor.getMaxPageSize()).thenReturn(10000);
 
-    List<PlayerAchievement> playerAchievements = instance.getPlayerAchievements(PLAYER_ID).toCompletableFuture().get(5, TimeUnit.SECONDS);
+    List<PlayerAchievement> playerAchievements = instance.getPlayerAchievements(PLAYER_ID)
+                                                         .collectList()
+                                                         .block(Duration.ofSeconds(5));
 
     assertThat(playerAchievements, hasSize(2));
     assertThat(playerAchievements, is(achievements));
@@ -70,7 +72,7 @@ public class AchievementServiceTest extends ServiceTest {
     when(fafApiAccessor.getMaxPageSize()).thenReturn(10000);
 
     when(fafApiAccessor.getMany(any())).thenReturn(Flux.just(achievementDefinition));
-    List<AchievementDefinition> result = instance.getAchievementDefinitions().join();
+    List<AchievementDefinition> result = instance.getAchievementDefinitions().collectList().block();
     verify(fafApiAccessor).getMany(argThat(ElideMatchers.hasPageSize(10000)));
     verify(fafApiAccessor).getMany(argThat(ElideMatchers.hasSort("order", true)));
     assertThat(result, contains(achievementDefinition));

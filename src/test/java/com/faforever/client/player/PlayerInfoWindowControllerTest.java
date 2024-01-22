@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.testfx.util.WaitForAsyncUtils;
+import reactor.core.publisher.Flux;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -38,7 +39,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -98,7 +98,7 @@ public class PlayerInfoWindowControllerTest extends PlatformTest {
     lenient().when(uiService.loadFxml("theme/chat/player_rating_chart_tooltip.fxml"))
              .thenReturn(playerRatingChartTooltipController);
     lenient().when(playerRatingChartTooltipController.getRoot()).thenReturn(new Pane());
-    lenient().when(playerService.getPlayerNames(any())).thenReturn(CompletableFuture.completedFuture(List.of()));
+    lenient().when(playerService.getPlayerNames(any())).thenReturn(Flux.empty());
     lenient().when(leaderboardService.getLeaderboards())
              .thenReturn(CompletableFuture.completedFuture(List.of(leaderboard)));
     lenient().when(leaderboardService.getEntriesForPlayer(eq(player)))
@@ -115,13 +115,11 @@ public class PlayerInfoWindowControllerTest extends PlatformTest {
 
   @Test
   public void testSetPlayerInfoBeanNoAchievementUnlocked() {
-    when(achievementService.getAchievementDefinitions()).thenReturn(CompletableFuture.completedFuture(singletonList(
-        AchievementDefinitionBuilder.create().defaultValues().get()
-    )));
+    when(achievementService.getAchievementDefinitions()).thenReturn(
+        Flux.just(AchievementDefinitionBuilder.create().defaultValues().get()));
     when(uiService.loadFxml("theme/achievement_item.fxml")).thenReturn(achievementItemController);
-    when(achievementService.getPlayerAchievements(player.getId())).thenReturn(CompletableFuture.completedFuture(
-        singletonList(PlayerAchievementBuilder.create().defaultValues().get())
-    ));
+    when(achievementService.getPlayerAchievements(player.getId())).thenReturn(
+        Flux.just(PlayerAchievementBuilder.create().defaultValues().get()));
     when(eventService.getPlayerEvents(player.getId())).thenReturn(CompletableFuture.completedFuture(new HashMap<>()));
 
     instance.setPlayer(player);
@@ -142,14 +140,16 @@ public class PlayerInfoWindowControllerTest extends PlatformTest {
 
   @Test
   public void testSetPlayerInfoBean() {
-    when(achievementService.getAchievementDefinitions()).thenReturn(CompletableFuture.completedFuture(List.of(
-        AchievementDefinitionBuilder.create().id("foo-bar").get()
-    )));
+    when(achievementService.getAchievementDefinitions()).thenReturn(
+        Flux.just(AchievementDefinitionBuilder.create().id("foo-bar").get()));
     when(uiService.loadFxml("theme/achievement_item.fxml")).thenReturn(achievementItemController);
     when(uiService.loadFxml("theme/user_leaderboard_info.fxml")).thenReturn(userLeaderboardInfoController);
-    when(achievementService.getPlayerAchievements(player.getId())).thenReturn(CompletableFuture.completedFuture(List.of(
-        PlayerAchievementBuilder.create().defaultValues().achievementId("foo-bar").state(AchievementState.UNLOCKED).get()
-        )));
+    when(achievementService.getPlayerAchievements(player.getId())).thenReturn(Flux.just(
+        PlayerAchievementBuilder.create()
+                                .defaultValues()
+                                .achievementId("foo-bar")
+                                .state(AchievementState.UNLOCKED)
+                                .get()));
     when(eventService.getPlayerEvents(player.getId())).thenReturn(CompletableFuture.completedFuture(new HashMap<>()));
     when(leaderboardService.getActiveSeasons()).thenReturn(CompletableFuture.completedFuture(List.of(
         LeagueSeasonBeanBuilder.create().defaultValues().leaderboard(leaderboard).get()

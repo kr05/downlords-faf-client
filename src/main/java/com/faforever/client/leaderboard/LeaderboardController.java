@@ -128,13 +128,13 @@ public class LeaderboardController extends NodeController<StackPane> {
       return;
     }
 
-    playerService.getPlayerByName(searchText).thenAccept(playerBeanOptional -> playerBeanOptional.ifPresent(player ->
+    playerService.getPlayerByName(searchText).doOnNext(player ->
       leaderboardService.getLeagueEntryForPlayer(player, season).thenAccept(leagueEntry -> {
         if (leagueEntry == null) {
           return;
         }
         selectLeagueEntry(leagueEntry);
-      })));
+      })).subscribe();
   }
 
   public void setSeason(LeagueSeasonBean season) {

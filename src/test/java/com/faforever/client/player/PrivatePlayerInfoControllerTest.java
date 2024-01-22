@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.testfx.util.WaitForAsyncUtils;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
@@ -71,10 +72,8 @@ public class PrivatePlayerInfoControllerTest extends PlatformTest {
                                             .get();
 
     lenient().when(gameDetailController.gameProperty()).thenReturn(new SimpleObjectProperty<>());
-    lenient().when(achievementService.getPlayerAchievements(player.getId()))
-             .thenReturn(CompletableFuture.completedFuture(List.of()));
-    lenient().when(achievementService.getAchievementDefinitions())
-             .thenReturn(CompletableFuture.completedFuture(List.of()));
+    lenient().when(achievementService.getPlayerAchievements(player.getId())).thenReturn(Flux.empty());
+    lenient().when(achievementService.getAchievementDefinitions()).thenReturn(Flux.empty());
     lenient().when(leaderboardService.getLeaderboards())
              .thenReturn(CompletableFuture.completedFuture(List.of(leaderboard)));
     lenient().when(i18n.getOrDefault(leaderboard.getTechnicalName(), leaderboard.getNameKey()))

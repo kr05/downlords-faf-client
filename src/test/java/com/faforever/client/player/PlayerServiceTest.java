@@ -167,7 +167,7 @@ public class PlayerServiceTest extends ServiceTest {
     PlayerBean playerBean = PlayerBeanBuilder.create().defaultValues().get();
     Flux<ElideEntity> resultFlux = Flux.just(playerMapper.map(playerBean, new CycleAvoidingMappingContext()));
     when(fafApiAccessor.getMany(any())).thenReturn(resultFlux);
-    Optional<PlayerBean> result = instance.getPlayerByName("test").join();
+    Optional<PlayerBean> result = instance.getPlayerByName("test").blockOptional();
 
     verify(fafApiAccessor).getMany(argThat(ElideMatchers.hasFilter(qBuilder().string("login").eq("test"))));
     assertThat(result.orElse(null), is(playerBean));
@@ -175,7 +175,7 @@ public class PlayerServiceTest extends ServiceTest {
 
   @Test
   public void testGetPlayerByNamePlayerOnline() {
-    instance.getPlayerByName("junit2").join();
+    instance.getPlayerByName("junit2").blockOptional();
 
     verify(fafApiAccessor, never()).getMany(any());
   }
@@ -185,14 +185,14 @@ public class PlayerServiceTest extends ServiceTest {
     PlayerBean playerBean = PlayerBeanBuilder.create().defaultValues().username("junit4").id(4).get();
     Flux<ElideEntity> resultFlux = Flux.just(playerMapper.map(playerBean, new CycleAvoidingMappingContext()));
     when(fafApiAccessor.getMany(any())).thenReturn(resultFlux);
-    instance.getPlayersByIds(List.of(1, 2, 3, 4)).join();
+    instance.getPlayersByIds(List.of(1, 2, 3, 4)).blockLast();
 
     verify(fafApiAccessor).getMany(argThat(ElideMatchers.hasFilter(qBuilder().intNum("id").in(List.of(4)))));
   }
 
   @Test
   public void testGetPlayersByIdsAllPlayersOnline() {
-    instance.getPlayersByIds(List.of(2, 3)).join();
+    instance.getPlayersByIds(List.of(2, 3)).blockLast();
 
     verify(fafApiAccessor, never()).getMany(any());
   }

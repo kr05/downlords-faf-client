@@ -141,7 +141,7 @@ public class ReportDialogController extends NodeController<Node> {
   }
 
   private void submitReport(ModerationReportBean report) {
-    playerService.getPlayerByName(offender.getText())
+    playerService.getPlayerByName(offender.getText()).singleOptional().toFuture()
         .thenApply(player -> {
           if (player.isEmpty()) {
             warnNoPlayer();

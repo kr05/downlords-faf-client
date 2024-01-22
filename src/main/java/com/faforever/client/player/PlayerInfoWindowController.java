@@ -55,6 +55,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -276,43 +278,37 @@ public class PlayerInfoWindowController extends NodeController<Node> {
 
   private void updateNameHistory() {
     playerService.getPlayerNames(player)
-        .thenAccept(names -> nameHistoryTable.setItems(FXCollections.observableList(names)))
-        .exceptionally(throwable -> {
-          log.error("Could not load player name history", throwable);
-          notificationService.addImmediateErrorNotification(throwable, "userInfo.nameHistory.errorLoading");
-          return null;
-        });
+                 .collectList()
+                 .publishOn(fxApplicationThreadExecutor.asScheduler())
+                 .doOnNext(names -> nameHistoryTable.setItems(FXCollections.observableList(names)))
+                 .publishOn(Schedulers.single())
+                 .subscribe(null, throwable -> {
+                   log.error("Could not load player name history", throwable);
+                   notificationService.addImmediateErrorNotification(throwable, "userInfo.nameHistory.errorLoading");
+                 });
   }
 
   private void loadAchievements() {
     enterAchievementsLoadingState();
     achievementService.getAchievementDefinitions()
-        .exceptionally(throwable -> {
-          log.error("Player achievements could not be loaded", throwable);
-          notificationService.addImmediateErrorNotification(throwable, "userInfo.achievements.errorLoading");
-          return Collections.emptyList();
-        })
-        .thenAccept(this::setAvailableAchievements)
-        .exceptionally(throwable -> {
-          log.error("Could not set available achievements", throwable);
-          notificationService.addImmediateErrorNotification(throwable, "userInfo.achievements.errorLDisplaying");
-          return null;
-        })
-        .thenCompose(aVoid -> achievementService.getPlayerAchievements(player.getId()))
-        .exceptionally(throwable -> {
-          log.error("Could not get PlayerAchievements", throwable);
-          notificationService.addImmediateErrorNotification(throwable, "userInfo.achievements.errorLDisplaying");
-          return null;
-        })
-        .thenAccept(playerAchievements -> {
-          updatePlayerAchievements(playerAchievements);
-          enterAchievementsLoadedState();
-        })
-        .exceptionally(throwable -> {
-          log.warn("Could not display achievement definitions", throwable);
-          notificationService.addImmediateErrorNotification(throwable, "userInfo.achievements.errorLDisplaying");
-          return null;
-        });
+                      .onErrorResume(throwable -> {
+                        log.error("Player achievements could not be loaded", throwable);
+                        notificationService.addImmediateErrorNotification(throwable,
+                                                                          "userInfo.achievements.errorLoading");
+                        return Mono.empty();
+                      })
+                      .collectList()
+                      .doOnNext(this::setAvailableAchievements)
+                      .flatMapMany(aVoid -> achievementService.getPlayerAchievements(player.getId()))
+                      .collectList()
+                      .subscribe(playerAchievements -> {
+                        updatePlayerAchievements(playerAchievements);
+                        enterAchievementsLoadedState();
+                      }, throwable -> {
+                        log.warn("Could not display achievement definitions", throwable);
+                        notificationService.addImmediateErrorNotification(throwable,
+                                                                          "userInfo.achievements.errorLDisplaying");
+                      });
   }
 
   private void plotFactionsChart(Map<String, PlayerEvent> playerEvents) {

@@ -14,6 +14,7 @@ import com.faforever.client.leaderboard.LeaderboardService;
 import com.faforever.client.util.IdenticonUtil;
 import com.faforever.client.util.RatingUtil;
 import com.faforever.commons.api.dto.AchievementState;
+import com.faforever.commons.api.dto.PlayerAchievement;
 import com.faforever.commons.lobby.GameStatus;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -29,6 +30,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
 import java.util.Objects;
 
@@ -128,24 +131,16 @@ public class PrivatePlayerInfoController extends NodeController<Node> {
   }
 
   private void populateUnlockedAchievementsLabel(PlayerBean player) {
-    achievementService.getAchievementDefinitions()
-        .thenApply(achievementDefinitions -> {
-          int totalAchievements = achievementDefinitions.size();
-          return achievementService.getPlayerAchievements(player.getId())
-              .thenAccept(playerAchievements -> {
-                long numUnlockedAchievements = playerAchievements.stream()
-                    .filter(playerAchievement -> playerAchievement.getState() == AchievementState.UNLOCKED)
-                    .count();
-
-                fxApplicationThreadExecutor.execute(() -> unlockedAchievements.setText(
-                    i18n.get("chat.privateMessage.achievements.unlockedFormat", numUnlockedAchievements, totalAchievements))
-                );
-              })
-              .exceptionally(throwable -> {
-                log.error("Could not load achievements for player '" + player.getId(), throwable);
-                return null;
-              });
-        });
+    Mono<Long> totalAchievementsMono = achievementService.getAchievementDefinitions().count();
+    Mono<Long> numAchievementsUnlockedMono = achievementService.getPlayerAchievements(player.getId())
+                                                               .map(PlayerAchievement::getState)
+                                                               .filter(AchievementState.UNLOCKED::equals)
+                                                               .count();
+    Mono.zip(totalAchievementsMono, numAchievementsUnlockedMono)
+        .publishOn(fxApplicationThreadExecutor.asScheduler())
+        .subscribe(TupleUtils.consumer((totalAchievements, numUnlockedAchievements) -> unlockedAchievements.setText(
+                       i18n.get("chat.privateMessage.achievements.unlockedFormat", numUnlockedAchievements, totalAchievements))),
+                   throwable -> log.error("Could not load achievements for player '" + player.getId(), throwable));
   }
 
   private void loadReceiverRatingInformation(PlayerBean player) {

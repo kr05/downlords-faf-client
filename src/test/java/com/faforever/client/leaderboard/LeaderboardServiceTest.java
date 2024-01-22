@@ -40,7 +40,6 @@ import reactor.util.function.Tuple2;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import static com.faforever.commons.api.elide.ElideNavigator.qBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -278,7 +277,7 @@ public class LeaderboardServiceTest extends ServiceTest {
         leaderboardMapper.map(leagueEntryBean, new CycleAvoidingMappingContext()));
     when(fafApiAccessor.getMany(any())).thenReturn(resultFlux);
     when(playerService.getPlayersByIds(List.of(1))).thenReturn(
-        CompletableFuture.completedFuture(List.of(PlayerBeanBuilder.create().id(1).username("junit").get())));
+        Flux.just(PlayerBeanBuilder.create().id(1).username("junit").get()));
 
     List<LeagueEntryBean> result = instance.getEntries(subdivisionBean).toCompletableFuture().join();
     Assertions.assertEquals(List.of(leagueEntryBean), result);

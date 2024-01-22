@@ -22,9 +22,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -98,8 +98,7 @@ public class LeaderboardControllerTest extends PlatformTest {
     when(leaderboardService.getEntries(subdivisionBean2)).thenReturn(
         CompletableFuture.completedFuture(List.of(leagueEntryBean3)));
     when(playerService.getCurrentPlayer()).thenReturn(player);
-    when(playerService.getPlayerByName("Sheikah")).thenReturn(CompletableFuture.completedFuture(
-        Optional.of(sheikah)));
+    when(playerService.getPlayerByName("Sheikah")).thenReturn(Mono.just(sheikah));
     when(leaderboardService.getSizeOfDivision(subdivisionBean1)).thenReturn(CompletableFuture.completedFuture(2));
     when(leaderboardService.getSizeOfDivision(subdivisionBean2)).thenReturn(CompletableFuture.completedFuture(1));
     when(leaderboardService.getPlayerNumberInHigherDivisions(subdivisionBean1)).thenReturn(CompletableFuture.completedFuture(1));

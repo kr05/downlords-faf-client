@@ -2,6 +2,7 @@ package com.faforever.client.steam;
 
 import com.codedisaster.steamworks.SteamAPI;
 import com.codedisaster.steamworks.SteamException;
+import com.codedisaster.steamworks.SteamLibraryLoaderGdx;
 import com.faforever.client.preferences.GeneralPrefs;
 import com.faforever.client.preferences.Preferences;
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +28,14 @@ public class SteamService implements InitializingBean, DisposableBean {
 
     try {
       log.info("Starting the Steam API");
-      SteamAPI.loadLibraries();
+      SteamAPI.loadLibraries(new SteamLibraryLoaderGdx());
       if (SteamAPI.init()) {
         log.debug("Steam API started");
       } else {
         log.debug("Steam API failed to start");
       }
     } catch (SteamException e) {
-      log.warn("Unable to start Steam API", e);
+      log.warn("Unable to start Steam API");
     }
   }
 

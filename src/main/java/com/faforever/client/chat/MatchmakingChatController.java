@@ -1,6 +1,6 @@
 package com.faforever.client.chat;
 
-import com.faforever.client.discord.JoinDiscordEventHandler;
+//import com.faforever.client.discord.JoinDiscordEventHandler;
 import com.faforever.client.domain.PlayerBean;
 import com.faforever.client.i18n.I18n;
 import com.faforever.client.teammatchmaking.TeamMatchmakingService;
@@ -21,7 +21,7 @@ import static com.faforever.client.chat.ChatService.PARTY_CHANNEL_SUFFIX;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchmakingChatController extends AbstractChatTabController {
 
-  private final JoinDiscordEventHandler joinDiscordEventHandler;
+//  private final JoinDiscordEventHandler joinDiscordEventHandler;
   private final TeamMatchmakingService teamMatchmakingService;
   private final I18n i18n;
 
@@ -29,10 +29,9 @@ public class MatchmakingChatController extends AbstractChatTabController {
   public TextFlow topicText;
   public Hyperlink discordLink;
 
-  public MatchmakingChatController(I18n i18n, ChatService chatService, JoinDiscordEventHandler joinDiscordEventHandler,
-                                   TeamMatchmakingService teamMatchmakingService) {
+  public MatchmakingChatController(I18n i18n, ChatService chatService, TeamMatchmakingService teamMatchmakingService) {
     super(chatService);
-    this.joinDiscordEventHandler = joinDiscordEventHandler;
+//    this.joinDiscordEventHandler = joinDiscordEventHandler;
     this.teamMatchmakingService = teamMatchmakingService;
     this.i18n = i18n;
   }
@@ -66,6 +65,6 @@ public class MatchmakingChatController extends AbstractChatTabController {
   }
 
   public void onDiscordButtonClicked() {
-    joinDiscordEventHandler.onJoin(discordLink.getText());
+//    joinDiscordEventHandler.onJoin(discordLink.getText());
   }
 }

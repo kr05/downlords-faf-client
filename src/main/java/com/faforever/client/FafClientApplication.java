@@ -55,8 +55,11 @@ public class FafClientApplication extends Application {
       Font.loadFont(inputStream, 10);
     }
 
-    applicationContext = new SpringApplicationBuilder(Main.class)
-        .run(getParameters().getRaw().toArray(new String[0]));
+//    applicationContext = new SpringApplicationBuilder(Main.class).run(getParameters().getRaw().toArray(new String[0]));
+
+    SpringApplicationBuilder builder = new SpringApplicationBuilder(Main.class);
+    builder.headless(false);
+    applicationContext = builder.run(getParameters().getRaw().toArray(new String[0]));
 
     Thread.setDefaultUncaughtExceptionHandler(applicationContext.getBean(GlobalExceptionHandler.class));
   }
